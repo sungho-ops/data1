@@ -67,3 +67,25 @@ def simulate(payload):
     result.sort(key=lambda r:r['production'],reverse=True)
     return emit({'demand':float(f.sum()),'production':float(x.sum()),'imports':float(m.sum()),
                  'valueAdded':float(v.sum()),'multiplier':float(x.sum()/f.sum()),'rows':result})
+def analyze_linkage():
+    if not valid:
+        raise ValueError('검증된 데이터가 없습니다.')
+    
+    # 1. 후방연쇄효과 (영향력 계수: 열의 합 / 전체 열 합의 평균)
+    col_sums = L.sum(axis=0)
+    col_sums_avg = col_sums.mean()
+    power = col_sums / col_sums_avg
+    
+    # 2. 전방연쇄효과 (감응도 계수: 행의 합 / 전체 행 합의 평균)
+    row_sums = L.sum(axis=1)
+    row_sums_avg = row_sums.mean()
+    sensitivity = row_sums / row_sums_avg
+    
+    # 결과를 딕셔너리 리스트로 묶기
+    result = [{'code': c, 'name': n, 'power': float(p), 'sensitivity': float(s)} 
+              for c, n, p, s in zip(codes, names, power, sensitivity)]
+    
+    # 영향력 계수(후방연쇄효과)가 큰 순서대로 내림차순 정렬
+    result.sort(key=lambda r: r['power'], reverse=True)
+    
+    return emit(result)
