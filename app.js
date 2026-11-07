@@ -57,31 +57,52 @@ $('load-basic').onclick=async()=>{
 };
 // 3. 전방 및 후방 연쇄효과 분석 버튼 이벤트
 document.getElementById('btn-linkage').addEventListener('click', async () => {
-    try {
-        // 기존에 만들어져 있는 call() 함수를 이용해 파이썬에 계산을 요청합니다.
-        const data = await call('analyze_linkage', {});
-        
-        const tbody = document.getElementById('tbody-linkage');
-        tbody.innerHTML = '';
-        
-        data.forEach(row => {
-            const tr = document.createElement('tr');
-            
-            // 계수가 1.0 이상이면 색상 강조
-            const powerStyle = row.power > 1.0 ? 'color: #d9534f; font-weight: bold;' : '';
-            const sensStyle = row.sensitivity > 1.0 ? 'color: #0275d8; font-weight: bold;' : '';
-            
-            tr.innerHTML = `
-                <td>${row.code}</td>
-                <td>${row.name}</td>
-                <td style="${powerStyle}">${row.power.toFixed(4)}</td>
-                <td style="${sensStyle}">${row.sensitivity.toFixed(4)}</td>
-            `;
-            tbody.appendChild(tr);
-        });
-        
-        document.getElementById('table-linkage').style.display = 'table';
-    } catch (e) {
-        alert('분석 오류: ' + e.message);
-    }
+  const btn = document.getElementById('btn-linkage');
+  const tbody = document.getElementById('linkage-results');
+  
+  try {
+    // 1) 버튼 상태 변경 (클릭 방지)
+    btn.disabled = true;
+    btn.textContent = '계산 중...';
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">데이터를 분석 중입니다...</td></tr>';
+    
+    // 2) 파이썬(worker) 쪽에 계산 요청
+    // (만약 파이썬으로 넘겨주어야 할 데이터가 있다면 call('analyze_linkage', 전달할데이터) 형태로 수정)
+    const data = await call('analyze_linkage'); 
+    
+    // 3) 기존 표 내용 지우기
+    tbody.innerHTML = ''; 
+    
+    // 4) 받아온 결과를 반복문으로 돌면서 행(tr) 생성
+    data.forEach(item => {
+      const tr = document.createElement('tr');
+      
+      // 영향력(후방)과 감응도(전방) 계수 값이 어떻게 넘어오는지 맞춰서 변수명을 수정해 주세요.
+      // (여기서는 파이썬에서 backward, forward라는 이름표로 넘어온다고 가정했습니다)
+      const backward = Number(item.backward || item.영향력계수);
+      const forward = Number(item.forward || item.감응도계수);
+      
+      // 주요 산업(둘 다 1.0 이상인 경우) 시각적 강조
+      if (backward >= 1.0 && forward >= 1.0) {
+        tr.style.backgroundColor = '#e6f4ea'; // 연한 녹색 배경
+        tr.style.fontWeight = 'bold';
+      }
+      
+      tr.innerHTML = `
+        <td>${item.code || item.산업코드}</td>
+        <td>${item.name || item.산업명}</td>
+        <td>${backward.toFixed(3)}</td>
+        <td>${forward.toFixed(3)}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+  } catch (error) {
+    console.error('연쇄효과 분석 중 오류:', error);
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:red;">분석 실패: ${error.message}</td></tr>`;
+  } finally {
+    // 5) 버튼 상태 복구
+    btn.disabled = false;
+    btn.textContent = '핵심 산업 분석하기';
+  }
 });
