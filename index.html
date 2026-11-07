@@ -9,7 +9,15 @@
 <section id="linkage-analysis">
   <h2>3. 전방 및 후방 연쇄효과 분석</h2>
   <p>각 산업의 영향력 계수(후방연쇄효과)와 감응도 계수(전방연쇄효과)를 계산하여 핵심 산업을 도출합니다.</p>
-  
+  <!-- 연도 선택 메뉴 추가 -->
+        <div style="margin-bottom: 15px;">
+            <label for="year-select"><strong>분석 연도 선택: </strong></label>
+            <select id="year-select" style="padding: 5px; font-size: 14px;">
+                <option value="2020">2020년</option>
+                <option value="2022">2022년</option>
+                <option value="2024">2024년</option>
+            </select>
+        </div>
   <button id="btn-linkage" type="button">핵심 산업 분석하기</button>
   
   <div class="scroll">
