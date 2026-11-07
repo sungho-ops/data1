@@ -89,3 +89,33 @@ def analyze_linkage():
     result.sort(key=lambda r: r['power'], reverse=True)
     
     return emit(result)
+def analyze_linkage():
+    if not valid:
+        raise ValueError('검증된 데이터가 없습니다.')
+    
+    n = len(codes)
+    
+    # 생산유발계수(L)의 열합(Column Sum)과 행합(Row Sum)
+    col_sums = L.sum(axis=0) # 후방연쇄효과(영향력 계수)
+    row_sums = L.sum(axis=1) # 전방연쇄효과(감응도 계수)
+    
+    # 산업 전체 평균 (모든 원소의 합 / 산업 수)
+    all_mean = L.sum() / n
+    
+    # 각 산업별 계수 계산
+    backward_coef = col_sums / all_mean
+    forward_coef = row_sums / all_mean
+    
+    results = []
+    for i in range(n):
+        results.append({
+            'code': codes[i],
+            'name': names[i],
+            'backward': float(backward_coef[i]),
+            'forward': float(forward_coef[i])
+        })
+        
+    # 영향력 계수(후방연쇄효과)가 큰 순서대로 내림차순 정렬
+    results.sort(key=lambda x: x['backward'], reverse=True)
+    
+    return emit(results)
