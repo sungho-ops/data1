@@ -64,10 +64,10 @@ document.getElementById('btn-linkage').addEventListener('click', async () => {
     // 1) 버튼 상태 변경 (클릭 방지)
     btn.disabled = true;
     btn.textContent = '계산 중...';
-    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">데이터를 분석 중입니다...</td></tr>';
+    // 칸 수가 5개로 늘었으므로 colspan="5"로 변경
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">데이터를 분석 중입니다...</td></tr>'; 
     
     // 2) 파이썬(worker) 쪽에 계산 요청
-    // (만약 파이썬으로 넘겨주어야 할 데이터가 있다면 call('analyze_linkage', 전달할데이터) 형태로 수정)
     const data = await call('analyze_linkage'); 
     
     // 3) 기존 표 내용 지우기
@@ -77,29 +77,32 @@ document.getElementById('btn-linkage').addEventListener('click', async () => {
     data.forEach(item => {
       const tr = document.createElement('tr');
       
-      // 영향력(후방)과 감응도(전방) 계수 값이 어떻게 넘어오는지 맞춰서 변수명을 수정해 주세요.
-      // (여기서는 파이썬에서 backward, forward라는 이름표로 넘어온다고 가정했습니다)
-      const backward = Number(item.backward || item.영향력계수);
-      const forward = Number(item.forward || item.감응도계수);
+      const backward = Number(item.backward);
+      const forward = Number(item.forward);
       
-      // 주요 산업(둘 다 1.0 이상인 경우) 시각적 강조
+      // 핵심 산업 여부에 따라 비고란 텍스트 설정
+      let note = '';
+      
       if (backward >= 1.0 && forward >= 1.0) {
-        tr.style.backgroundColor = '#e6f4ea'; // 연한 녹색 배경
+        note = '⭐ 핵심산업'; // 핵심 산업일 경우 텍스트 추가
+        tr.style.backgroundColor = '#e6f4ea';
         tr.style.fontWeight = 'bold';
       }
       
       tr.innerHTML = `
-        <td>${item.code || item.산업코드}</td>
-        <td>${item.name || item.산업명}</td>
+        <td>${item.code}</td>
+        <td>${item.name}</td>
         <td>${backward.toFixed(3)}</td>
         <td>${forward.toFixed(3)}</td>
+        <td style="color: #0b5345;">${note}</td> <!-- 추가된 비고 열 -->
       `;
       tbody.appendChild(tr);
     });
 
   } catch (error) {
     console.error('연쇄효과 분석 중 오류:', error);
-    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:red;">분석 실패: ${error.message}</td></tr>`;
+    // 에러 메시지도 colspan="5"로 변경
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:red;">분석 실패: ${error.message}</td></tr>`;
   } finally {
     // 5) 버튼 상태 복구
     btn.disabled = false;
