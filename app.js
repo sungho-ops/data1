@@ -55,3 +55,41 @@ $('load-basic').onclick=async()=>{
   if($('sheet').disabled){button.disabled=false;button.textContent='기본부문 다시 불러오기';}
  }
 };
+// 3. 전방 및 후방 연쇄효과 분석 버튼 이벤트
+document.getElementById('btn-linkage').addEventListener('click', () => {
+    // worker로 분석 명령 전송 (type: 'analyze_linkage')
+    worker.postMessage({ id: 'req_linkage', type: 'analyze_linkage' });
+});
+
+// worker로부터 메시지(계산 결과)를 받았을 때 처리하는 기존 onmessage 리스너를 찾아 그 내부에 아래 조건을 추가해야 합니다.
+// (app.js 코드 내에 worker.onmessage = function(e) { ... } 부분이 있을 것입니다.)
+
+/* ----- worker.onmessage 내부에 추가할 코드 시작 ----- */
+if (e.data.id === 'req_linkage') {
+    if (e.data.ok) {
+        const data = e.data.result;
+        const tbody = document.getElementById('tbody-linkage');
+        tbody.innerHTML = '';
+        
+        data.forEach(row => {
+            const tr = document.createElement('tr');
+            
+            // 1.0 이상이면 색상 강조
+            const powerStyle = row.power > 1.0 ? 'color: #d9534f; font-weight: bold;' : '';
+            const sensStyle = row.sensitivity > 1.0 ? 'color: #0275d8; font-weight: bold;' : '';
+            
+            tr.innerHTML = `
+                <td>${row.code}</td>
+                <td>${row.name}</td>
+                <td style="${powerStyle}">${row.power.toFixed(4)}</td>
+                <td style="${sensStyle}">${row.sensitivity.toFixed(4)}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+        
+        document.getElementById('table-linkage').style.display = 'table';
+    } else {
+        alert('분석 오류: ' + e.data.error);
+    }
+}
+/* ----- worker.onmessage 내부에 추가할 코드 끝 ----- */
