@@ -59,7 +59,7 @@ $('load-basic').onclick=async()=>{
 document.getElementById('btn-linkage').addEventListener('click', async () => {
   const btn = document.getElementById('btn-linkage');
   const tbody = document.getElementById('linkage-results');
-  
+  const selectedYear = document.getElementById('year-select').value;
   try {
     // 1) 버튼 상태 변경 (클릭 방지)
     btn.disabled = true;
