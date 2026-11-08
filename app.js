@@ -156,9 +156,21 @@ if(document.getElementById('run-trend')) {
         if($('sector') && $('sector').options.length > 0 && $('trend-sector').options.length <= 1) {
             $('trend-sector').innerHTML = $('sector').innerHTML;
             $('trend-sector').disabled = false;
+            if($('trend-search')) $('trend-search').disabled = false; // 검색창 활성화
             $('run-trend').disabled = false;
         }
     }, 1000);
+
+    // 👇 검색창에 글씨를 입력할 때마다 리스트를 필터링해주는 핵심 기능입니다!
+    if($('trend-search')) {
+        $('trend-search').oninput = () => {
+            const q = $('trend-search').value.trim();
+            if(typeof sectors !== 'undefined' && sectors.length > 0) {
+                // 입력한 글자가 포함된 산업만 골라서 드롭다운에 다시 띄워줍니다
+                options($('trend-sector'), sectors.filter(s => (s.code + ' ' + s.name).includes(q)));
+            }
+        };
+    }
 
     $('run-trend').onclick = async () => {
         const btn = $('run-trend');
@@ -168,6 +180,8 @@ if(document.getElementById('run-trend')) {
 
         btn.disabled = true;
         $('trend-sector').disabled = true;
+        if($('trend-search')) $('trend-search').disabled = true;
+        
         tbody.innerHTML = `<tr><td colspan="4" style="padding: 15px; text-align:center;">2022~2024년 데이터를 차례대로 분석 중입니다...<br>⏳ 엑셀 파일 3개를 연속으로 처리하므로 <strong>약 30초~1분 이상</strong> 소요될 수 있습니다. 잠시만 기다려주세요!</td></tr>`;
 
         try {
@@ -211,6 +225,7 @@ if(document.getElementById('run-trend')) {
         } finally {
             btn.disabled = false;
             $('trend-sector').disabled = false;
+            if($('trend-search')) $('trend-search').disabled = false;
             $('trend-sector').value = sectorCode; // 선택했던 산업 유지
         }
     };
