@@ -168,7 +168,7 @@ if(document.getElementById('run-trend')) {
 
         btn.disabled = true;
         $('trend-sector').disabled = true;
-        tbody.innerHTML = `<tr><td colspan="4" style="padding: 15px; text-align:center;">2022~2024년 데이터를 차례대로 분석 중입니다...<br>(약 10~15초 소요)</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" style="padding: 15px; text-align:center;">2022~2024년 데이터를 차례대로 분석 중입니다...<br>⏳ 엑셀 파일 3개를 연속으로 처리하므로 <strong>약 30초~1분 이상</strong> 소요될 수 있습니다. 잠시만 기다려주세요!</td></tr>`;
 
         try {
             const years = ['2022', '2023', '2024'];
