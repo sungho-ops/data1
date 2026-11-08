@@ -149,3 +149,69 @@ if(document.getElementById('reset-app')) {
     }
   });
 }
+// 4. 연도별 트렌드 분석 기능
+if(document.getElementById('run-trend')) {
+    // 기본 데이터가 불러와지면 트렌드 분석용 산업 목록도 자동으로 채워주는 타이머
+    const syncSectors = setInterval(() => {
+        if($('sector') && $('sector').options.length > 0 && $('trend-sector').options.length <= 1) {
+            $('trend-sector').innerHTML = $('sector').innerHTML;
+            $('trend-sector').disabled = false;
+            $('run-trend').disabled = false;
+        }
+    }, 1000);
+
+    $('run-trend').onclick = async () => {
+        const btn = $('run-trend');
+        const tbody = $('trend-results');
+        const sectorCode = $('trend-sector').value;
+        const originalYear = $('year-select').value; // 원래 보던 연도 기억하기
+
+        btn.disabled = true;
+        $('trend-sector').disabled = true;
+        tbody.innerHTML = `<tr><td colspan="4" style="padding: 15px; text-align:center;">2022~2024년 데이터를 차례대로 분석 중입니다...<br>(약 10~15초 소요)</td></tr>`;
+
+        try {
+            const years = ['2022', '2023', '2024'];
+            let html = '';
+
+            for (const y of years) {
+                if($('status')) $('status').textContent = `[트렌드 분석] ${y}년 데이터 처리 중...`;
+                
+                // 백그라운드에서 해당 연도 엑셀 다운로드 및 분석
+                const res = await fetch(`./data/io-${y}.xlsx`);
+                if(!res.ok) throw Error(`${y}년 데이터 없음`);
+                await load(await res.arrayBuffer()); 
+                
+                const linkageData = await call('analyze_linkage');
+                const target = linkageData.find(item => item.code === sectorCode);
+
+                if (target) {
+                    const back = Number(target.backward);
+                    const fwd = Number(target.forward);
+                    let note = (back >= 1.0 && fwd >= 1.0) ? '⭐ 핵심산업' : '';
+                    html += `
+                        <tr>
+                            <td style="padding: 10px;"><strong>${y}년</strong></td>
+                            <td>${back.toFixed(3)}</td>
+                            <td>${fwd.toFixed(3)}</td>
+                            <td style="color: #0b5345; font-weight: bold;">${note}</td>
+                        </tr>`;
+                }
+            }
+            tbody.innerHTML = html;
+            
+            // 원래 보던 연도로 복구
+            if($('status')) $('status').textContent = `트렌드 분석 완료! (원래 보던 ${originalYear}년 데이터로 복구 중...)`;
+            await loadSelectedWorkbook(originalYear);
+            if($('status')) $('status').textContent = `트렌드 분석 완료! (${originalYear}년 데이터 복구됨)`;
+
+        } catch(error) {
+            tbody.innerHTML = `<tr><td colspan="4" style="padding: 15px; text-align:center; color:red;">분석 실패: ${error.message}</td></tr>`;
+            if($('status')) $('status').textContent = `트렌드 분석 실패`;
+        } finally {
+            btn.disabled = false;
+            $('trend-sector').disabled = false;
+            $('trend-sector').value = sectorCode; // 선택했던 산업 유지
+        }
+    };
+}
