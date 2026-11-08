@@ -82,4 +82,36 @@
     </table>
   </div>
 </section>
+    <section id="trend">
+    <div class="section-heading">
+        <h2>4. 연도별 트렌드 비교 (2022~2024)</h2>
+    </div>
+    <p>특정 산업을 선택하면 3년간의 전방·후방 연쇄효과 변화 추이를 분석합니다.</p>
+    
+    <div style="margin-bottom: 15px; display: flex; gap: 10px; align-items: center;">
+        <label for="trend-sector"><strong>산업 선택:</strong></label>
+        <select id="trend-sector" style="padding: 5px; flex-grow: 1;" disabled>
+            <option>기본부문 데이터를 먼저 불러와주세요.</option>
+        </select>
+        <button id="run-trend" type="button" disabled>트렌드 분석하기</button>
+    </div>
+    
+    <div class="scroll" style="overflow-x: auto; max-height: 300px; border: 1px solid #ddd;">
+        <table style="width: 100%; border-collapse: collapse; text-align: center;">
+            <thead style="background-color: #f0f4f8;">
+                <tr>
+                    <th style="padding: 10px; border-bottom: 1px solid #ddd;">연도</th>
+                    <th style="padding: 10px; border-bottom: 1px solid #ddd;">후방 연쇄효과 (영향력)</th>
+                    <th style="padding: 10px; border-bottom: 1px solid #ddd;">전방 연쇄효과 (감응도)</th>
+                    <th style="padding: 10px; border-bottom: 1px solid #ddd;">비고</th>
+                </tr>
+            </thead>
+            <tbody id="trend-results">
+                <tr>
+                    <td colspan="4" style="padding: 15px;">산업을 선택하고 분석 버튼을 눌러주세요.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
 </main><footer>브라우저 계산 · GitHub Pages 배포용</footer></body></html>
