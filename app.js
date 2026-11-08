@@ -32,28 +32,34 @@ function renderResult(){$('results').hidden=false;$('cards').replaceChildren(...
 function csvCell(v){let s=String(v);if(/^[=+@-]/.test(s)&&typeof v!=='number')s="'"+s;return '"'+s.replaceAll('"','""')+'"';}
 $('download').onclick=()=>{if(!result)return;const rows=[['산업코드','산업명','생산유발액_백만원','수입유발액_백만원','부가가치유발액_백만원'],...result.rows.map(r=>[r.code,r.name,r.production,r.imports,r.valueAdded])];const url=URL.createObjectURL(new Blob(['\ufeff'+rows.map(r=>r.map(csvCell).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download='io-2023-results.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
 
-async function loadDefaultWorkbook(){
- try {
-  $('status').textContent='기본 Excel 내려받는 중…';
-  const response=await fetch('./data/io-2023.xlsx');
-  if(!response.ok)throw Error('기본 Excel 다운로드 실패 (HTTP '+response.status+')');
-  await load(await response.arrayBuffer());
- }catch(error){
-  $('status').textContent='준비 실패: '+error.message+' — 연결 상태를 확인하고 새로고침하세요.';
- }
+async function loadSelectedWorkbook(year){
+  try {
+    $('status').textContent=`${year}년 기본 Excel 내려받는 중...`;
+    const response=await fetch(`./data/io-${year}.xlsx`);
+    if(!response.ok)throw Error(`${year}년 Excel 다운로드 실패 (HTTP `+response.status+')');
+    await load(await response.arrayBuffer());
+  }catch(error){
+    $('status').textContent='준비 실패: '+error.message+' - 연결 상태를 확인하고 새로고침하세요.';
+    throw error;
+  }
 }
+
 $('load-basic').onclick=async()=>{
- const button=$('load-basic');
- button.disabled=true;
- button.textContent='불러오는 중…';
- try {
-  await loadDefaultWorkbook();
-  const ready=!$('sheet').disabled;
-  button.textContent=ready?'기본부문 불러오기 완료':'기본부문 다시 불러오기';
-  button.disabled=ready;
- }finally{
-  if($('sheet').disabled){button.disabled=false;button.textContent='기본부문 다시 불러오기';}
- }
+  const button=$('load-basic');
+  const selectedYear = document.getElementById('year-select').value;
+  
+  button.disabled=true;
+  button.textContent='불러오는 중...';
+  try {
+    await loadSelectedWorkbook(selectedYear);
+    const ready=!$('sheet').disabled;
+    button.textContent=ready?`${selectedYear}년 데이터 불러오기 완료`:'기본부문 다시 불러오기';
+    button.disabled=ready;
+  }catch(e){
+    // 에러 메세지는 loadSelectedWorkbook 내부에서 처리됨
+  }finally{
+    if($('sheet').disabled){button.disabled=false;button.textContent='기본부문 다시 불러오기';}
+  }
 };
 // 3. 전방 및 후방 연쇄효과 분석 버튼 이벤트
 document.getElementById('btn-linkage').addEventListener('click', async () => {
