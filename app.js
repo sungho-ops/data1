@@ -151,9 +151,9 @@ if(document.getElementById('reset-app')) {
 }
 // 4. 연도별 트렌드 분석 기능
 if(document.getElementById('run-trend')) {
-    // 기본 데이터가 불러와지면 트렌드 분석용 산업 목록도 자동으로 채워주는 타이머
+    // [버그 수정] 항목 갯수가 아닌, 초기 안내 문구가 있을 때만 복사하여 덮어쓰기 방지
     const syncSectors = setInterval(() => {
-        if($('sector') && $('sector').options.length > 0 && $('trend-sector').options.length <= 1) {
+        if($('sector') && $('sector').options.length > 0 && $('trend-sector').options[0] && $('trend-sector').options[0].textContent.includes('먼저')) {
             $('trend-sector').innerHTML = $('sector').innerHTML;
             $('trend-sector').disabled = false;
             if($('trend-search')) $('trend-search').disabled = false; // 검색창 활성화
@@ -161,13 +161,17 @@ if(document.getElementById('run-trend')) {
         }
     }, 1000);
 
-    // 👇 검색창에 글씨를 입력할 때마다 리스트를 필터링해주는 핵심 기능입니다!
     if($('trend-search')) {
         $('trend-search').oninput = () => {
             const q = $('trend-search').value.trim();
             if(typeof sectors !== 'undefined' && sectors.length > 0) {
-                // 입력한 글자가 포함된 산업만 골라서 드롭다운에 다시 띄워줍니다
-                options($('trend-sector'), sectors.filter(s => (s.code + ' ' + s.name).includes(q)));
+                const filtered = sectors.filter(s => (s.code + ' ' + s.name).includes(q));
+                options($('trend-sector'), filtered);
+                
+                // 검색 결과가 있으면 첫 번째 항목을 자동으로 선택
+                if(filtered.length > 0) {
+                    $('trend-sector').selectedIndex = 0;
+                }
             }
         };
     }
