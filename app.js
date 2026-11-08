@@ -121,3 +121,31 @@ if(document.getElementById('btn-linkage')) document.getElementById('btn-linkage'
     btn.textContent = '핵심 산업 분석하기';
   }
 });
+// 초기화 버튼 이벤트 (새로고침 없이 상태 리셋)
+if(document.getElementById('reset-app')) {
+  document.getElementById('reset-app').addEventListener('click', () => {
+    // 1. 불러오기 버튼 초기화
+    const loadBtn = document.getElementById('load-basic');
+    if(loadBtn) {
+      loadBtn.disabled = false;
+      loadBtn.textContent = '기본부문 불러오기';
+    }
+    
+    // 2. 화면의 표와 안내 문구 리셋
+    if($('sheet')) $('sheet').replaceChildren();
+    if($('row')) $('row').replaceChildren();
+    if($('cells')) $('cells').replaceChildren();
+    if($('explore-caption')) $('explore-caption').textContent = '기본 자료를 불러온 후 표시됩니다.';
+    if($('status')) $('status').textContent = '초기화되었습니다. 새로운 연도를 선택하고 불러오기를 눌러주세요.';
+    
+    // 3. 시뮬레이션 장바구니 및 결과창 초기화
+    invalidate();
+    basket = [];
+    renderBasket();
+    
+    // 4. 하단 입력 필드 및 버튼들 비활성화 (초기 상태로 되돌림)
+    for(const id of ['sheet','row','sector','add','run','row-search','col-search','sector-search','amount']){
+      if($(id)) $(id).disabled = true;
+    }
+  });
+}
