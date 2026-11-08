@@ -88,9 +88,13 @@
     </div>
     <p>특정 산업을 선택하면 3년간의 전방·후방 연쇄효과 변화 추이를 분석합니다.</p>
     
-    <div style="margin-bottom: 15px; display: flex; gap: 10px; align-items: center;">
+    <!-- 👇 산업 검색과 선택이 한 줄에 깔끔하게 들어가도록 수정했습니다 -->
+    <div style="margin-bottom: 15px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        <label for="trend-search"><strong>산업 검색:</strong></label>
+        <input type="text" id="trend-search" placeholder="예: 자동차, 반도체" style="padding: 5px; flex-grow: 1; max-width: 150px;" disabled>
+
         <label for="trend-sector"><strong>산업 선택:</strong></label>
-        <select id="trend-sector" style="padding: 5px; flex-grow: 1;" disabled>
+        <select id="trend-sector" style="padding: 5px; flex-grow: 2;" disabled>
             <option>기본부문 데이터를 먼저 불러와주세요.</option>
         </select>
         <button id="run-trend" type="button" disabled>트렌드 분석하기</button>
